@@ -7,25 +7,67 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING") // used for migrations
+  provider = "mongodb"
+  url = env("DATABASE_URL") // uses connection pooling
 }
 
 
+
+model propertyData {
+  id String @id @default(cuid()) @map("_id")
+  name String
+  propertyDescription String
+  developerName String
+  noOfUnit String
+  location String
+  tenure String
+  latitude Float
+  longitude Float
+  developmentDescription String
+  topDate String
+  main_image String
+  slug String @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  unitMix unitMix[]
+  nearbyAmenities nearbyAmenities[]
+  facilities facilities[]
+}
+
+model unitMix {
+  id                 String  @id @default(cuid()) @map("_id")
+  propertyId String
+  area String
+  property propertyData @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model nearbyAmenities {
+  id                 String  @id @default(cuid()) @map("_id")
+  propertyId String
+  type String
+  description String
+  property propertyData @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model facilities {
+  id                 String  @id @default(cuid()) @map("_id")
+  propertyId String
+  location String
+  description String
+  property propertyData @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
 model Account {
-  id                 String  @id @default(cuid())
+  id                 String  @id @default(cuid()) @map("_id")
   userId             String
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  refresh_token      String?
+  access_token       String?
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String?
   session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -35,7 +77,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(cuid()) @map("_id")
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -44,7 +86,7 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(cuid()) @map("_id")
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -54,6 +96,7 @@ model User {
 }
 
 model VerificationToken {
+  id         String @id   @default(cuid()) @map("_id")
   identifier String
   token      String   @unique
   expires    DateTime
